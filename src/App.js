@@ -29,6 +29,7 @@ function App() {
 
   const onImageSubmit = (event) => {
     event.preventDefault()
+    console.log('hello');
     setImageUrl(input)
     const app = new Clarifai.App({
       apiKey: '3c90c27a92f6444dbb9bb2c7571ac974'
