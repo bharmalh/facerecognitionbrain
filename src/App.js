@@ -1,4 +1,4 @@
-import React, { Component, useState  } from 'react';
+import React, { useState  } from 'react';
 import Clarifai from 'clarifai';
 import Navigation from './components/navigation/Navigation';
 import Signin from './components/Signin/Signin';
@@ -81,9 +81,9 @@ import './App.css';
     }  
 
 const ChangeTheRoute = (theRoute)=>{
-	if(route==='signOut'){
+	if(theRoute==='signOut'){
 		setIsSignedIn(false);
-	} else if (route==='home') {
+	} else if (theRoute==='home') {
 		setIsSignedIn(true);
 	}
   setRoute(theRoute);
