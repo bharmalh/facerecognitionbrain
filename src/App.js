@@ -1,9 +1,12 @@
 import React, { Component, useState  } from 'react';
 import Clarifai from 'clarifai';
 import Navigation from './components/navigation/Navigation';
+import Signin from './components/Signin/Signin';
+import Register from './components/Register/Register';
 import Particles from 'react-particles-js';
 import Logo from './components/logo/Logo';
 import ImageLinkForm from './components/imagelinkform/ImageLinkForm';
+import FaceRecognition from './components/FaceRecognition/FaceRecognition'
 import Rank from './components/rank/Rank';
 import './App.css';
 
@@ -24,22 +27,30 @@ import './App.css';
 
 
   const App = ()=> {
+
+
+//This is called a STATE HOOK. It is similar to using this.state if we used CLASS-based component
     const [input, setInput] = useState('')
     const [imageUrl, setImageUrl] = useState('')
     const [boxes, setBoxes] = useState([])
-  
+    const [route, setRoute] = useState('signIn')
+	const [isSignedIn, setIsSignedIn] = useState(false);
+
+
+
+
+//This function deals with the event of image submit. 
     const onImageSubmit = (event) => {
       event.preventDefault()
       setImageUrl(input)
-      const app = new Clarifai.App({
-        apiKey: '3c90c27a92f6444dbb9bb2c7571ac974',
-      })
+      const app = new Clarifai.App({apiKey: '3c90c27a92f6444dbb9bb2c7571ac974',})
+      
       if (input !== imageUrl) {
         app.models.predict(Clarifai.FACE_DETECT_MODEL, input)
           .then(response => {
             // console.log(response)
-            const totalFaces = response.outputs[0].data.regions
-            console.log(totalFaces.length, 'faces detected')
+            const totalFaces = response.outputs[0].data.regions;
+            console.log(totalFaces.length, 'faces detected');
   
             setBoxes(
               totalFaces.map(face =>
@@ -51,7 +62,11 @@ import './App.css';
           })
       }
     }
-  
+
+
+
+
+//This function calculates the coordinates for the FaceBox. It is called in the ImageSubmit Function above.
     const calculateFaceLocation = (data) => {
       const clarifaiFace = data.region_info.bounding_box
       const image = document.getElementById('inputImage')
@@ -63,137 +78,43 @@ import './App.css';
         rightCol: width - (clarifaiFace.right_col * width),
         bottomRow: height - (clarifaiFace.bottom_row * height)
       }
-    }
-  
+    }  
+
+const ChangeTheRoute = (theRoute)=>{
+	if(route==='signOut'){
+		setIsSignedIn(false);
+	} else if (route==='home') {
+		setIsSignedIn(true);
+	}
+  setRoute(theRoute);
+}
+
+
+
     return (
       <div className="App">
         <div>
           <Particles className='particles' params={particleParams} />
-          <Navigation />
-          <Logo />
-          <Rank />
-          <ImageLinkForm onInputChange={e => setInput(e.target.value)} onImageSubmit={onImageSubmit} />
-         
+          <Navigation isSignedIn={isSignedIn} onRouteChange={ChangeTheRoute}/>
+        {route==='home' ? 
+          <div> 
+            <Logo />
+            <Rank />
+            <ImageLinkForm onInputChange={e => setInput(e.target.value)} onImageSubmit={onImageSubmit} />
+            <FaceRecognition imageUrl={imageUrl} boxes={boxes} />
+          </div> 
+    : (
+		route==='signIn'
+		?   <Signin onRouteChange={ChangeTheRoute} />
+		:   <Register onRouteChange={ChangeTheRoute} />
+	) 
+  
+        }
         </div>
       </div>
     );
-  }
-
+      }
 
 
   export default App;
 
-  // <FaceRecognition imageUrl={imageUrl} boxes={boxes} />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// class App extends React.Component {
-  
-//   render(){
-//     const [input, setInput] = useState('');
-//   const [imageUrl, setImageUrl] = useState('');
-//   // const [boxes, setBoxes] = useState([]);
-
-//   const onImageSubmit = (event) => {
-//     event.preventDefault();
-//     setImageUrl(input)
-//     const app = new Clarifai.App({
-//       apiKey: '3c90c27a92f6444dbb9bb2c7571ac974'
-//     })
-//     if(input !== imageUrl) {
-//       app.models.predict(Clarifai.FACE_DETECT_MODEL, input)
-//       .then(response => {
-//         console.log(response);
-//       })
-//       .catch(err => {
-//         console.log(err.toJSON())
-//       })
-//     }
-//   }
-//     return (
-//       <div className="App">
-//       <div>
-// 	  	<Particles className='particles' params={particleParams} />
-//       	<Navigation />
-//       	<Logo />
-//      	<Rank />
-//       	<ImageLinkForm onInputChange={e => setInput(e.target.value)} onImageSubmit={onImageSubmit} />
-//         {/* <FaceRecognition imageUrl={imageUrl} boxes={boxes} /> */}
-//       </div>
-//     </div>
-//     )
-//   }
-// }
-
-
-
-
-
-
-// class App extends Component {
-// constructor() {
-//   super();
-//   this.state = {
-//     input: '',
-//   }
-// }
-// onInputChange = (event) => {
-//   console.log(event.target.value);
-// }
-
-// onButtonSubmit = () => {
-//   console.log('click');
-//   App.models.
-//   predict(
-//   "3c90c27a92f6444dbb9bb2c7571ac974",
-//   "https://samples.clarifai.com/face-det.jpg").
-//   then(
-//   function(response){
-//   //do something with response
-//    console.log(response);
-//   },
-//   function(err) {
-//   }
-//   );
-// }
-//   render(){
-//   return (
-//     <div className="App">
-//        <Particles className='particles' params={particleParams} />
-//       <Navigation />
-//       <Logo />
-//       <Rank />
-//       <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
-//       {/* 
-//       <FaceRecognition /> */}
-//     </div>
-//   );
-// }
-// }
-
-
-  
