@@ -1,4 +1,4 @@
-import React, { useState  } from 'react';
+import React, {useState} from 'react';
 import Clarifai from 'clarifai';
 import Navigation from './components/navigation/Navigation';
 import Signin from './components/Signin/Signin';
@@ -26,7 +26,9 @@ import './App.css';
 
 
 
-  const App = ()=> {
+
+
+const App = ()=> {
 
 
 //This is called a STATE HOOK. It is similar to using this.state if we used CLASS-based component
@@ -35,7 +37,32 @@ import './App.css';
     const [boxes, setBoxes] = useState([])
     const [route, setRoute] = useState('signIn')
 	const [isSignedIn, setIsSignedIn] = useState(false);
+	const [users, setUser] = useState({
+		id: '',
+		name: '',
+		email: '',
+		entries: 0,
+		joined: new Date()
+	});
 
+const loadUser=(data) => {
+	setUser({
+		id: data.id,
+		name: data.name,
+		email: data.email,
+		entries: data.entries,
+		joined: data.dateJoined
+	})
+}
+
+/*	We just used this to test if the front end is communicating with the backend. useEffect is the same as componentDidMount in class-based Apps
+
+	useEffect(() => {
+		fetch('http://localhost:3004/')
+		.then(response=>response.json())
+		.then(data=>console.log(data))
+	}, [])
+*/
 
 
 
@@ -48,7 +75,17 @@ import './App.css';
       if (input !== imageUrl) {
         app.models.predict(Clarifai.FACE_DETECT_MODEL, input)
           .then(response => {
-            // console.log(response)
+            if(response) {
+				fetch('http://localhost:3004/image/', {
+					method: 'put',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({id: users.id})
+				})
+				.then(response=>response.json())
+				.then(count=>{
+					setUser(Object.assign(users, {entries: count}))
+				})
+			}
             const totalFaces = response.outputs[0].data.regions;
             console.log(totalFaces.length, 'faces detected');
   
@@ -64,8 +101,6 @@ import './App.css';
     }
 
 
-
-
 //This function calculates the coordinates for the FaceBox. It is called in the ImageSubmit Function above.
     const calculateFaceLocation = (data) => {
       const clarifaiFace = data.region_info.bounding_box
@@ -79,6 +114,7 @@ import './App.css';
         bottomRow: height - (clarifaiFace.bottom_row * height)
       }
     }  
+	
 
 const ChangeTheRoute = (theRoute)=>{
 	if(theRoute==='signOut'){
@@ -90,7 +126,6 @@ const ChangeTheRoute = (theRoute)=>{
 }
 
 
-
     return (
       <div className="App">
         <div>
@@ -98,15 +133,15 @@ const ChangeTheRoute = (theRoute)=>{
           <Navigation isSignedIn={isSignedIn} onRouteChange={ChangeTheRoute}/>
         {route==='home' ? 
           <div> 
-            <Logo />
-            <Rank />
+            {/* <Logo /> */}
+            <Rank name={users.name} entries={users.entries}/>
             <ImageLinkForm onInputChange={e => setInput(e.target.value)} onImageSubmit={onImageSubmit} />
             <FaceRecognition imageUrl={imageUrl} boxes={boxes} />
           </div> 
     : (
 		route==='signIn'
-		?   <Signin onRouteChange={ChangeTheRoute} />
-		:   <Register onRouteChange={ChangeTheRoute} />
+		?   <Signin loadUser={loadUser} onRouteChange={ChangeTheRoute} />
+		:   <Register loadUser={loadUser} onRouteChange={ChangeTheRoute} />
 	) 
   
         }
