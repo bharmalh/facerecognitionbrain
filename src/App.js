@@ -83,8 +83,9 @@ const loadUser=(data) => {
 				})
 				.then(response=>response.json())
 				.then(count=>{
-					setUser(Object.assign(users, {entries: count}))
+					setUser({ ...users, entries: count})
 				})
+        .catch(console.log)
 			}
             const totalFaces = response.outputs[0].data.regions;
             console.log(totalFaces.length, 'faces detected');
@@ -119,6 +120,7 @@ const loadUser=(data) => {
 const ChangeTheRoute = (theRoute)=>{
 	if(theRoute==='signOut'){
 		setIsSignedIn(false);
+    setImageUrl('');
 	} else if (theRoute==='home') {
 		setIsSignedIn(true);
 	}
